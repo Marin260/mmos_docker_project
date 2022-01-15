@@ -1,0 +1,35 @@
+version: "3.7"
+services: 
+    db:
+        image: postgres:14.1
+        volumes:
+            - ./data/db:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=postgres
+        #     - POSTGRES_HOST=localhost
+        # container_name: postgres_db
+    redis:
+        image: "redis:alpine"
+        container_name: redis
+    web:
+        build: .
+            # context: .
+            # dockerfile: Dockerfile
+        command: > 
+            bash -c "python manage.py makemigrations &&
+            python manage.py migrate &&
+            python manage.py runserver 0.0.0.0:8000"
+        volumes: 
+            - .:/app
+        ports: 
+            - "8000:8000"
+        environment:
+            - POSTGRES_NAME=postgres
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+        depends_on: 
+            - db
+            - redis
+   
